@@ -1,0 +1,1076 @@
+import React, { useState, useEffect, useRef } from 'react';
+
+const Icons = {
+  Upload: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+    </svg>
+  ),
+  Bot: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+  ),
+  Book: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+    </svg>
+  ),
+  Mindmap: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+    </svg>
+  ),
+  Network: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  ),
+  Presentation: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21h8M12 3v18M3 5h18M3 19h18" />
+    </svg>
+  ),
+  Search: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+  ),
+  Sparkles: () => (
+    <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+    </svg>
+  ),
+  Check: () => (
+    <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+  ),
+  Info: () => (
+    <svg className="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  ZoomIn: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+    </svg>
+  ),
+  ZoomOut: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM7 10h6" />
+    </svg>
+  )
+};
+
+const DEFAULT_PAPER = {
+  title: "Attention Is All You Need",
+  authors: "Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser, Illia Polosukhin",
+  year: "2017",
+  abstract: "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.",
+  rawText: `Attention Is All You Need. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Łukasz Kaiser, Illia Polosukhin. 2017.
+The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train.
+Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles by over 2 BLEU. On the WMT 2014 English-to-French translation task, our model establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature.
+We show that the Transformer generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data.`,
+  mindmap: {
+    label: "Transformer Architecture",
+    children: [
+      {
+        label: "Encoder",
+        children: [
+          { label: "Self-Attention Layer (Multi-Head)" },
+          { label: "Feed Forward Network (FFN)" },
+          { label: "Residual Connections & LayerNorm" }
+        ]
+      },
+      {
+        label: "Decoder",
+        children: [
+          { label: "Masked Self-Attention Layer" },
+          { label: "Encoder-Decoder Cross-Attention" },
+          { label: "Feed Forward Network" }
+        ]
+      },
+      {
+        label: "Core Mechanisms",
+        children: [
+          { label: "Scaled Dot-Product Attention" },
+          { label: "Multi-Head Projection" },
+          { label: "Positional Encoding (Sine/Cosine)" }
+        ]
+      },
+      {
+        label: "Performance",
+        children: [
+          { label: "28.4 BLEU (English-German)" },
+          { label: "41.8 BLEU (English-French)" },
+          { label: "Highly Parallelizable Training" }
+        ]
+      }
+    ]
+  },
+  knowledgeGraph: {
+    nodes: [
+      { id: "1", label: "Transformer", group: "method", desc: "The proposed feed-forward architecture based entirely on self-attention." },
+      { id: "2", label: "Self-Attention", group: "mechanism", desc: "Relates different positions of a single sequence to compute representation." },
+      { id: "3", label: "Multi-Head Attention", group: "mechanism", desc: "Allows the model to jointly attend to information from different representation subspaces." },
+      { id: "4", label: "Positional Encoding", group: "mechanism", desc: "Injects information about relative or absolute position of tokens in the sequence." },
+      { id: "5", label: "BLEU Score", group: "metric", desc: "Evaluation metric for machine translation quality." },
+      { id: "6", label: "Recurrent Networks", group: "comparison", desc: "Traditional sequential architectures (LSTM/GRU) replaced by Transformers." },
+      { id: "7", label: "Parallelization", group: "benefit", desc: "The ability to perform simultaneous computations, drastically reducing training time." }
+    ],
+    links: [
+      { source: "1", target: "2", label: "utilizes" },
+      { source: "2", target: "3", label: "scales into" },
+      { source: "1", target: "4", label: "incorporates" },
+      { source: "1", target: "5", label: "evaluated by" },
+      { source: "1", target: "6", label: "replaces" },
+      { source: "3", target: "7", label: "enables" },
+      { source: "6", target: "7", label: "limits" }
+    ]
+  },
+  presentation: [
+    {
+      title: "Introduction & Context",
+      bullets: [
+        "Traditional sequential transduction models rely deeply on Recurrent (RNN/LSTM) or Convolutional neural nets.",
+        "Sequential nature prevents massive parallelization during training, posing a bottleneck for large datasets.",
+        "Attention mechanisms were previously used primarily as a connector between sequential components."
+      ]
+    },
+    {
+      title: "The Transformer Solution",
+      bullets: [
+        "A novel architecture discarding recurrence entirely in favor of global attention mechanisms.",
+        "Allows significantly more parallelization, scaling effectively across modern GPU setups.",
+        "Drastically decreases training time while achieving superior translation quality."
+      ]
+    },
+    {
+      title: "Scaled Dot-Product Attention",
+      bullets: [
+        "Computes attention using Queries (Q), Keys (K), and Values (V) matrices.",
+        "Formula: softmax(Q * K^T / sqrt(d_k)) * V",
+        "The scaling factor 1/sqrt(d_k) prevents extremely small gradients on large dimensions."
+      ]
+    },
+    {
+      title: "Multi-Head Attention",
+      bullets: [
+        "Projects Queries, Keys, and Values h times into lower dimensions.",
+        "Performs attention calculations in parallel, then concatenates and projects the results.",
+        "Enables the model to focus on context from multiple representation subspaces concurrently."
+      ]
+    },
+    {
+      title: "Key Results & Impact",
+      bullets: [
+        "Achieved 28.4 BLEU on English-to-German, setting a new record in 2017.",
+        "Achieved 41.8 BLEU on English-to-French after only 3.5 days of training on 8 GPUs.",
+        "Laid the foundation for almost all modern LLMs (GPT, Gemini, Claude, LLaMA)."
+      ]
+    }
+  ]
+};
+
+export default function App() {
+  const [paper, setPaper] = useState(null);
+  const [activeTab, setActiveTab] = useState('viewer'); // 'viewer', 'mindmap', 'graph', 'slides'
+  const [chatMessages, setChatMessages] = useState([
+    {
+      sender: 'bot',
+      text: "Welcome! To get started, you can upload any research paper PDF in the top right corner, or load our high-fidelity machine learning demo paper instantly.",
+      reasoning: "Awaiting user input or document load.",
+      citations: []
+    }
+  ]);
+  const [inputValue, setInputValue] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [parsingPdf, setParsingPdf] = useState(false);
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState(null);
+  const [slideIndex, setSlideIndex] = useState(0);
+  const [slideTheme, setSlideTheme] = useState('midnight'); // 'midnight' or 'light'
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showSpeakerNotes, setShowSpeakerNotes] = useState(true);
+  
+  // Visual PDF rendering state
+  const [pdfDoc, setPdfDoc] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pdfScale, setPdfScale] = useState(1.0); // Reset default to perfectly readable 1.0 zoom
+  const [pdfBlobUrl, setPdfBlobUrl] = useState('');
+  const [pdfRenderError, setPdfRenderError] = useState(false);
+  const [isRenderingPage, setIsRenderingPage] = useState(false);
+
+  const fileInputRef = useRef(null);
+  const chatEndRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  // Graph state values
+  const [graphNodes, setGraphNodes] = useState([]);
+  const [graphLinks, setGraphLinks] = useState([]);
+
+  useEffect(() => {
+    let playTimer;
+    if (isPlaying && paper?.presentation) {
+      playTimer = setInterval(() => {
+        setSlideIndex(prev => (prev + 1) % paper.presentation.length);
+      }, 4500);
+    }
+    return () => clearInterval(playTimer);
+  }, [isPlaying, paper]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  useEffect(() => {
+    let active = true;
+    
+    const render = async () => {
+      if (activeTab !== 'viewer' || !pdfDoc) return;
+      setIsRenderingPage(true);
+      
+      // Give DOM time to mount canvas ref
+      await new Promise(resolve => setTimeout(resolve, 80));
+      if (!active) return;
+
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        // Fallback retry if mounting was delayed
+        await new Promise(resolve => setTimeout(resolve, 150));
+        if (!active || !canvasRef.current) return;
+      }
+
+      try {
+        setPdfRenderError(false);
+        const page = await pdfDoc.getPage(currentPage);
+        const currentCanvas = canvasRef.current;
+        if (!currentCanvas) return;
+
+        const context = currentCanvas.getContext('2d');
+        const viewport = page.getViewport({ scale: pdfScale });
+        currentCanvas.height = viewport.height;
+        currentCanvas.width = viewport.width;
+
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
+        }).promise;
+      } catch (err) {
+        console.error("PDF page render failure: ", err);
+        setPdfRenderError(true);
+      } finally {
+        setIsRenderingPage(false);
+      }
+    };
+
+    render();
+    return () => {
+      active = false;
+    };
+  }, [activeTab, pdfDoc, currentPage, pdfScale, paper]);
+
+  const handleLoadDemo = () => {
+    setPaper(DEFAULT_PAPER);
+    setGraphNodes(DEFAULT_PAPER.knowledgeGraph.nodes);
+    setGraphLinks(DEFAULT_PAPER.knowledgeGraph.links);
+    setPdfDoc(null);
+    setChatMessages(prev => [...prev, {
+      sender: 'bot',
+      text: "Demo paper loaded successfully! I've populated the Mindmap, the stable Knowledge Graph, and your Slideshow. Ask me complex or out-of-topic queries!",
+      reasoning: "Loaded static dataset fallback securely.",
+      citations: []
+    }]);
+  };
+
+  const handlePdfUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setParsingPdf(true);
+    setLoading(true);
+
+    const blobUrl = URL.createObjectURL(file);
+    setPdfBlobUrl(blobUrl);
+
+    try {
+      if (!window.pdfjsLib) {
+        await new Promise((resolve) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js';
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+      }
+
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+      const fileReader = new FileReader();
+      fileReader.onload = async function () {
+        const typedarray = new Uint8Array(this.result);
+        const pdf = await window.pdfjsLib.getDocument(typedarray).promise;
+        
+        setPdfDoc(pdf);
+        setTotalPages(pdf.numPages);
+        setCurrentPage(1);
+
+        let extractedText = '';
+        const pageCount = Math.min(pdf.numPages, 8);
+        for (let i = 1; i <= pageCount; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const textItems = textContent.items.map(item => item.str).join(' ');
+          extractedText += `\n--- PAGE ${i} ---\n` + textItems;
+        }
+
+        await structurePaperWithGemini(file.name, extractedText);
+      };
+      fileReader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error(error);
+      setParsingPdf(false);
+      setLoading(false);
+    }
+  };
+
+  const structurePaperWithGemini = async (fileName, textContext) => {
+    const apiKey = ""; 
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+    const systemPrompt = `You are a world-class scientific paper analyzer. Your job is to extract paper metadata, construct a beautiful hierarchical mindmap, build a structured entity-relationship knowledge graph, and craft a 5-slide presentation deck.
+Respond ONLY with a JSON object adhering exactly to this schema:
+{
+  "title": "string",
+  "authors": "string",
+  "year": "string",
+  "abstract": "string",
+  "mindmap": {
+    "label": "Main Topic",
+    "children": [
+      { "label": "Branch 1", "children": [ { "label": "Leaf A" } ] }
+    ]
+  },
+  "knowledgeGraph": {
+    "nodes": [ { "id": "1", "label": "Node Label", "group": "method|mechanism|metric|concept|benefit", "desc": "description" } ],
+    "links": [ { "source": "1", "target": "2", "label": "relationship" } ]
+  },
+  "presentation": [
+    { "title": "Slide Title", "bullets": ["bullet 1", "bullet 2"] }
+  ]
+}`;
+
+    const prompt = `Analyze this paper named "${fileName}" and provide metadata, a nested mindmap summarizing key sections, a knowledge graph with 5-10 nodes showcasing key terms/relationships, and a 5-slide summary deck. Here is the parsed paper text:\n\n${textContext.substring(0, 8000)}`;
+
+    try {
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: { responseMimeType: "application/json" }
+      };
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const structuredData = JSON.parse(responseText);
+
+      const newPaper = {
+        title: structuredData.title || fileName,
+        authors: structuredData.authors || "Unknown Authors",
+        year: structuredData.year || "N/A",
+        abstract: structuredData.abstract || "No abstract extracted.",
+        rawText: textContext,
+        mindmap: structuredData.mindmap || DEFAULT_PAPER.mindmap,
+        knowledgeGraph: structuredData.knowledgeGraph || DEFAULT_PAPER.knowledgeGraph,
+        presentation: structuredData.presentation || DEFAULT_PAPER.presentation
+      };
+
+      setPaper(newPaper);
+      setGraphNodes(newPaper.knowledgeGraph.nodes);
+      setGraphLinks(newPaper.knowledgeGraph.links);
+      setSlideIndex(0);
+      setParsingPdf(false);
+      setLoading(false);
+
+      setChatMessages(prev => [...prev, {
+        sender: 'bot',
+        text: `Successfully parsed and visualised "${newPaper.title}". I have populated your interactive dashboards!`,
+        reasoning: "Completed secure metadata structured mapping.",
+        citations: []
+      }]);
+    } catch (err) {
+      console.error(err);
+      setParsingPdf(false);
+      setLoading(false);
+    }
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!inputValue.trim() || loading) return;
+
+    const userMessage = inputValue;
+    setInputValue('');
+    setChatMessages(prev => [...prev, { sender: 'user', text: userMessage }]);
+    setLoading(true);
+
+    const apiKey = "";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+    const systemPrompt = `You are an expert ArXiv research companion. You have access to the context of the currently opened research paper.
+You MUST answer the user's questions clearly.
+Wait, to make parsing easy, please return a structured JSON response containing:
+1. "answer": The complete text response. If the user asks an out-of-topic question, answer it fully and engagingly, then gently suggest how it might relate to the paper context if possible.
+2. "thinking_path": A detailed explanation of your analytical logic, showing *how* you derived the answer.
+3. "citations": An array of references found directly in the paper context. Each citation has:
+   - "quote": The exact sentence or concept from the paper.
+   - "section": The section name or page number (e.g., "Page 1").
+   - "relevance": Why this citation is crucial to the answer.
+
+Format the output strictly as JSON. Ensure the JSON is completely valid.`;
+
+    const paperTitle = paper?.title || "No Title Loaded";
+    const paperYear = paper?.year || "";
+    const paperAuthors = paper?.authors || "";
+    const paperAbstract = paper?.abstract || "";
+    const paperText = paper?.rawText || "No context yet.";
+
+    const prompt = `Currently loaded paper: ${paperTitle} (${paperYear}) by ${paperAuthors}.
+Abstract: ${paperAbstract}
+Extracted Paper Excerpts:\n${paperText.substring(0, 12000)}
+
+User Query: ${userMessage}`;
+
+    try {
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: { responseMimeType: "application/json" }
+      };
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      const rawResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const result = JSON.parse(rawResponse);
+
+      setChatMessages(prev => [...prev, {
+        sender: 'bot',
+        text: result.answer,
+        reasoning: result.thinking_path,
+        citations: result.citations || []
+      }]);
+    } catch (err) {
+      console.error(err);
+      setChatMessages(prev => [...prev, {
+        sender: 'bot',
+        text: "I read your question but had trouble formulating a structured citation. Based on the paper, the concepts are highly integrated.",
+        reasoning: "API error. Provided safe fallback answer.",
+        citations: []
+      }]);
+    }
+    setLoading(false);
+  };
+
+  const handleCitationClick = (sectionStr) => {
+    if (!pdfDoc) return;
+    const match = sectionStr.match(/Page\s*(\d+)/i);
+    if (match && match[1]) {
+      const pageNum = parseInt(match[1]);
+      if (pageNum >= 1 && pageNum <= totalPages) {
+        setCurrentPage(pageNum);
+        setActiveTab('viewer');
+      }
+    }
+  };
+
+  const renderMindmapNode = (node, depth = 0) => {
+    if (!node) return null;
+    return (
+      <div key={node.label + depth} className="flex flex-col ml-6 mt-2 relative">
+        {depth > 0 && (
+          <div className="absolute left-[-16px] top-[14px] w-4 h-[2px] bg-slate-700" />
+        )}
+        <div className="flex items-center gap-2">
+          <div className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all cursor-pointer ${
+            depth === 0 
+              ? 'bg-indigo-950/40 border-indigo-500 text-indigo-300 shadow-md shadow-indigo-950/20' 
+              : depth === 1
+              ? 'bg-slate-800/80 border-slate-700 text-slate-200'
+              : 'bg-slate-900/50 border-slate-800 text-slate-400'
+          } hover:scale-105 hover:border-indigo-400`}>
+            {String(node.label)}
+          </div>
+        </div>
+        {node.children && node.children.length > 0 && (
+          <div className="border-l border-slate-800 ml-2 pl-2">
+            {node.children.map(child => renderMindmapNode(child, depth + 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const getNodeCoordinates = (nodeId, totalNodes) => {
+    const index = parseInt(nodeId) || 1;
+    if (index === 1) return { x: 200, y: 150 }; // Center Node
+    const count = totalNodes > 1 ? totalNodes - 1 : 1;
+    const angle = ((index - 2) * 2 * Math.PI) / count;
+    return {
+      x: 200 + 95 * Math.cos(angle),
+      y: 150 + 95 * Math.sin(angle)
+    };
+  };
+
+  return (
+    <div className="h-screen w-screen bg-[#0f172a] text-slate-100 flex flex-col font-sans overflow-hidden selection:bg-indigo-500 selection:text-white">
+      
+      {/* Top Header Section */}
+      <header className="h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 flex items-center justify-between shrink-0 z-30">
+        <div className="flex items-center gap-3">
+          <div className="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-900/30 flex items-center justify-center">
+            <Icons.Sparkles />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-400 via-sky-400 to-emerald-400 bg-clip-text text-transparent">
+              ArXiv Intelligent Workspace
+            </h1>
+            <p className="text-[10px] text-slate-400">Interactive PDF Analysis & Visual AI Copilot</p>
+          </div>
+        </div>
+
+        {/* PDF Upload Control in Header */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => fileInputRef.current.click()}
+            className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-md transition-all active:scale-95"
+          >
+            <Icons.Upload />
+            <span>Upload PDF</span>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/pdf"
+            onChange={handlePdfUpload}
+            className="hidden"
+          />
+          {parsingPdf && (
+            <div className="flex items-center gap-2 text-indigo-400 text-xs font-semibold animate-pulse">
+              <div className="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></div>
+              Parsing PDF...
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Main Layout Area: Side-by-Side Split */}
+      <div className="flex-1 flex overflow-hidden">
+        
+        {/* LEFT COLUMN: Visual Document & Interactive Panels */}
+        <div className="w-7/12 flex flex-col border-r border-slate-800 bg-[#0b0f19] overflow-hidden">
+          
+          {paper ? (
+            <>
+              {/* Active document tag & Title */}
+              <div className="p-4 border-b border-slate-800 bg-slate-900/40 shrink-0">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold tracking-widest uppercase bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20">
+                    ACTIVE SCIENTIFIC DOCUMENT
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-400">
+                    {pdfDoc ? `Total: ${totalPages} Pages` : "Simulated Version"}
+                  </span>
+                </div>
+                <h2 className="text-base font-bold text-white tracking-tight leading-snug truncate mt-1">{paper?.title}</h2>
+                <p className="text-xs text-slate-400 italic truncate">By {paper?.authors}</p>
+              </div>
+
+              {/* Tab Selector */}
+              <div className="flex border-b border-slate-800 bg-slate-900/60 p-1 shrink-0">
+                <button
+                  onClick={() => setActiveTab('viewer')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+                    activeTab === 'viewer' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Icons.Book />
+                  <span>Original PDF Document</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('mindmap')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+                    activeTab === 'mindmap' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Icons.Mindmap />
+                  <span>Mindmap</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('graph')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+                    activeTab === 'graph' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Icons.Network />
+                  <span>Knowledge Graph</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('slides')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-semibold rounded-lg transition-all ${
+                    activeTab === 'slides' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Icons.Presentation />
+                  <span>Slideshow Pitch</span>
+                </button>
+              </div>
+
+              {/* Workspace Area */}
+              <div className="flex-1 overflow-y-auto p-4 flex flex-col">
+                
+                {/* TAB 1: Real PDF Canvas Reader / Double Column Latex view */}
+                {activeTab === 'viewer' && (
+                  <div className="flex-1 flex flex-col min-h-0">
+                    {pdfDoc ? (
+                      <div className="flex flex-col flex-1">
+                        <div className="flex items-center justify-between p-2 bg-slate-900 rounded-xl border border-slate-800 mb-3 shrink-0">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                              disabled={currentPage === 1}
+                              className="px-2.5 py-1 text-xs font-semibold bg-slate-800 text-slate-200 rounded-lg hover:bg-slate-700 disabled:opacity-40"
+                            >
+                              Previous
+                            </button>
+                            <span className="text-xs text-slate-300">
+                              Page <span className="text-indigo-400 font-bold">{currentPage}</span> of {totalPages}
+                            </span>
+                            <button
+                              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                              disabled={currentPage === totalPages}
+                              className="px-2.5 py-1 text-xs font-semibold bg-slate-800 text-slate-200 rounded-lg hover:bg-slate-700 disabled:opacity-40"
+                            >
+                              Next
+                            </button>
+                          </div>
+
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => setPdfScale(prev => Math.max(0.6, prev - 0.1))}
+                              className="p-1.5 bg-slate-800 rounded-lg hover:bg-slate-700"
+                              title="Zoom Out"
+                            >
+                              <Icons.ZoomOut />
+                            </button>
+                            <span className="text-xs text-slate-400 px-1">{Math.round(pdfScale * 100)}%</span>
+                            <button
+                              onClick={() => setPdfScale(prev => Math.min(2.0, prev + 0.1))}
+                              className="p-1.5 bg-slate-800 rounded-lg hover:bg-slate-700"
+                              title="Zoom In"
+                            >
+                              <Icons.ZoomIn />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Rendering Canvas Container */}
+                        <div className="flex-1 overflow-auto border border-slate-800 rounded-2xl bg-slate-950/80 flex justify-center p-4 relative min-h-[350px]">
+                          {isRenderingPage && (
+                            <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm flex items-center justify-center z-10 rounded-2xl">
+                              <span className="text-xs text-indigo-400 font-semibold animate-pulse">Rendering Page Canvas...</span>
+                            </div>
+                          )}
+                          {pdfRenderError ? (
+                            <div className="text-center p-6 flex flex-col items-center justify-center w-full">
+                              <p className="text-xs text-rose-400 mb-3">Error rendering visual PDF canvas.</p>
+                              <iframe src={pdfBlobUrl} className="w-full h-[500px] rounded-xl border border-slate-800" />
+                            </div>
+                          ) : (
+                            <canvas ref={canvasRef} className="shadow-2xl rounded-lg border border-slate-800 max-w-full h-auto bg-white" />
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      // MOCK HIGH FIDELITY ARXIV PAPER SHEET (For fallback default paper)
+                      <div className="flex-1 flex flex-col">
+                        <div className="p-3 bg-indigo-950/20 border border-indigo-500/20 rounded-xl mb-4 flex items-center justify-between shrink-0">
+                          <div className="flex items-center gap-2">
+                            <Icons.Info />
+                            <span className="text-xs text-slate-300">Viewing standard preloaded paper. Upload your custom PDF to parse it visually!</span>
+                          </div>
+                        </div>
+
+                        <div className="flex-1 bg-white text-slate-900 p-8 rounded-xl border border-slate-300 shadow-2xl font-serif leading-relaxed overflow-y-auto max-h-[550px] space-y-6">
+                          <div className="text-center space-y-2 border-b border-slate-200 pb-6">
+                            <span className="text-[10px] font-sans font-bold tracking-widest text-indigo-600 block">arXiv:1706.03762v7 [cs.CL]</span>
+                            <h1 className="text-2xl font-bold tracking-tight text-slate-950">{paper?.title}</h1>
+                            <p className="text-xs text-slate-600 font-sans">{paper?.authors}</p>
+                            <p className="text-[10px] text-slate-400 font-sans">Google Brain / Google Research</p>
+                          </div>
+
+                          <div className="px-6 py-4 bg-slate-50 border border-slate-100 rounded-lg">
+                            <h4 className="text-center font-bold font-sans text-xs uppercase tracking-wider text-slate-800 mb-2">Abstract</h4>
+                            <p className="text-xs text-slate-700 leading-relaxed text-justify italic">{paper?.abstract}</p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-6 text-[11px] text-slate-800 text-justify">
+                            <div className="space-y-3">
+                              <h4 className="font-bold font-sans text-xs text-slate-950 border-b border-slate-200 pb-1">1. Introduction</h4>
+                              <p>
+                                Recurrent neural networks, long short-term memory and gated recurrent neural networks in particular, have been firmly established as state of the art approaches in sequence modeling and transduction problems.
+                              </p>
+                              <p>
+                                To allow for significantly more parallelization and reduce the computation time, we propose the Transformer, an architecture designed to dispense with recurrence entirely.
+                              </p>
+                            </div>
+                            <div className="space-y-3">
+                              <h4 className="font-bold font-sans text-xs text-slate-950 border-b border-slate-200 pb-1">2. Architecture</h4>
+                              <p>
+                                The Transformer follows an overall architecture using stacked self-attention and point-wise, fully connected layers for both the encoder and decoder.
+                              </p>
+                              <div className="p-2.5 bg-slate-100 rounded-lg border border-slate-200 text-center font-sans font-semibold text-[10px] my-2">
+                                Attention(Q, K, V) = softmax(QKᵀ / √d_k)V
+                              </div>
+                              <p>
+                                Multi-head attention allows the model to jointly attend to information from different representation subspaces at different positions.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* TAB 2: Mindmap */}
+                {activeTab === 'mindmap' && (
+                  <div className="space-y-6">
+                    <div className="bg-slate-900/40 p-4 rounded-xl border border-slate-800 flex items-center gap-3">
+                      <Icons.Info />
+                      <p className="text-xs text-slate-400">
+                        This mindmap dynamically structures the logical flow of the research paper. You can click parent nodes to review hierarchy.
+                      </p>
+                    </div>
+                    <div className="border border-slate-800 rounded-2xl p-6 bg-slate-950/60 overflow-x-auto min-h-[350px]">
+                      {renderMindmapNode(paper?.mindmap)}
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 3: Knowledge Graph with Stable Coordinates */}
+                {activeTab === 'graph' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="md:col-span-1 space-y-3">
+                        <h4 className="text-xs font-bold tracking-wider text-slate-400 uppercase">Entity Legend</h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
+                            <span className="text-xs text-slate-300">Method</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-sky-500"></span>
+                            <span className="text-xs text-slate-300">Mechanism</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span className="text-xs text-slate-300">Metric</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-amber-500"></span>
+                            <span className="text-xs text-slate-300">Comparison</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full bg-rose-500"></span>
+                            <span className="text-xs text-slate-300">Benefit</span>
+                          </div>
+                        </div>
+
+                        {selectedNode && (
+                          <div className="mt-4 p-3 bg-slate-900/95 rounded-xl border border-slate-800 shadow-xl">
+                            <h5 className="text-xs font-bold text-indigo-400">{selectedNode.label}</h5>
+                            <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">{selectedNode.desc}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="md:col-span-3 border border-slate-800 rounded-2xl bg-slate-950 p-4 min-h-[320px] relative flex flex-col justify-between">
+                        <div className="absolute top-3 left-3 bg-slate-900/80 px-2 py-1 rounded text-[10px] text-slate-400 border border-slate-800">
+                          Entity Graph Canvas
+                        </div>
+
+                        <div className="flex-1 flex items-center justify-center">
+                          <svg className="w-full h-[250px]" viewBox="0 0 400 300">
+                            {/* Connections */}
+                            {graphLinks.map((link, idx) => {
+                              const srcNode = graphNodes.find(n => n.id === link.source);
+                              const tgtNode = graphNodes.find(n => n.id === link.target);
+                              if (!srcNode || !tgtNode) return null;
+                              
+                              const p1 = getNodeCoordinates(srcNode.id, graphNodes.length);
+                              const p2 = getNodeCoordinates(tgtNode.id, graphNodes.length);
+
+                              return (
+                                <g key={idx}>
+                                  <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="#334155" strokeWidth="1.5" strokeDasharray="3" />
+                                  <text x={(p1.x + p2.x) / 2} y={(p1.y + p2.y) / 2 - 4} fill="#94a3b8" fontSize="8" textAnchor="middle">{link.label}</text>
+                                </g>
+                              );
+                            })}
+
+                            {/* Nodes with static orbital layout */}
+                            {graphNodes.map((node) => {
+                              const p = getNodeCoordinates(node.id, graphNodes.length);
+                              const isHovered = hoveredNodeId === node.id;
+                              
+                              let color = "fill-indigo-500";
+                              if (node.group === "mechanism") color = "fill-sky-500";
+                              if (node.group === "metric") color = "fill-emerald-500";
+                              if (node.group === "comparison") color = "fill-amber-500";
+                              if (node.group === "benefit") color = "fill-rose-500";
+
+                              return (
+                                <g 
+                                  key={node.id} 
+                                  className="cursor-pointer" 
+                                  onClick={() => setSelectedNode(node)}
+                                  onMouseEnter={() => setHoveredNodeId(node.id)}
+                                  onMouseLeave={() => setHoveredNodeId(null)}
+                                >
+                                  <circle 
+                                    cx={p.x} 
+                                    cy={p.y} 
+                                    r={isHovered ? 14 : 10} 
+                                    className={`${color} stroke-[#0f172a] stroke-2 hover:stroke-white transition-all duration-150`} 
+                                  />
+                                  <text x={p.x} y={p.y + 22} fill="#e2e8f0" fontSize="9" textAnchor="middle" fontWeight="bold">{node.label}</text>
+                                </g>
+                              );
+                            })}
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 4: Classical Presentation Slideshow Design */}
+                {activeTab === 'slides' && (
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        Slide {slideIndex + 1} of {paper?.presentation?.length || 1}
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setSlideIndex(prev => Math.max(0, prev - 1))}
+                          disabled={slideIndex === 0}
+                          className="px-3 py-1 bg-slate-800 text-slate-200 rounded disabled:opacity-50 text-xs font-semibold hover:bg-slate-700"
+                        >
+                          Back
+                        </button>
+                        <button
+                          onClick={() => setSlideIndex(prev => Math.min((paper?.presentation?.length || 1) - 1, prev + 1))}
+                          disabled={slideIndex === (paper?.presentation?.length || 1) - 1}
+                          className="px-3 py-1 bg-indigo-600 text-white rounded disabled:opacity-50 text-xs font-semibold hover:bg-indigo-500"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 border border-slate-700/80 rounded-2xl p-8 min-h-[260px] relative flex flex-col justify-between overflow-hidden shadow-2xl">
+                      <div className="absolute right-0 top-0 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full" />
+                      <div>
+                        <h3 className="text-xl font-extrabold text-white tracking-tight border-b border-indigo-500/20 pb-3 mb-4">
+                          {paper?.presentation?.[slideIndex]?.title}
+                        </h3>
+                        <ul className="space-y-3">
+                          {paper?.presentation?.[slideIndex]?.bullets?.map((bullet, idx) => (
+                            <li key={idx} className="text-xs text-slate-300 leading-relaxed flex items-start gap-2">
+                              <span className="text-indigo-400 font-bold">•</span>
+                              <span>{String(bullet)}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 mt-8 border-t border-slate-800/60 pt-4">
+                        <span>{paper?.title}</span>
+                        <span>ArXiv LLM Presentation Companion</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            </>
+          ) : (
+            // EMBEDDED FRESH START ONBOARDING ENVIRONMENT
+            <div className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-[#070b12]">
+              <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-indigo-900/30">
+                <Icons.Bot />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 text-white">No Document Loaded</h2>
+              <p className="text-slate-400 mb-8 max-w-md text-sm leading-relaxed">
+                Upload a research paper PDF in the top left or load our high-fidelity machine learning demo document to explore mindmaps, entity graphs, and slides.
+              </p>
+              <button 
+                onClick={handleLoadDemo} 
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-6 py-3 rounded-xl font-semibold transition-all shadow-md active:scale-95"
+              >
+                Explore Sample Paper
+              </button>
+            </div>
+          )}
+
+        </div>
+
+        {/* RIGHT COLUMN: Advanced AI Research Copilot Q&A Panel */}
+        <div className="w-5/12 flex flex-col bg-slate-950 overflow-hidden">
+          
+          <div className="p-4 border-b border-slate-800 bg-slate-900/40 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <Icons.Bot />
+              <div>
+                <h3 className="text-sm font-bold text-white">AI Research Copilot</h3>
+                <span className="text-[10px] text-emerald-400 font-medium">Gemini 2.5 Flash Online</span>
+              </div>
+            </div>
+            <div className="flex gap-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            </div>
+          </div>
+
+          {/* Chat Messages viewport */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {chatMessages.map((msg, i) => (
+              <div key={i} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                
+                {/* Text Bubble */}
+                <div className={`max-w-[90%] rounded-2xl p-4 text-xs leading-relaxed shadow-sm ${
+                  msg.sender === 'user' 
+                    ? 'bg-indigo-600 text-white rounded-br-none' 
+                    : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-bl-none'
+                }`}>
+                  {msg.text}
+                </div>
+
+                {/* Reasoning Trace & Dynamic Citation Hooks */}
+                {msg.sender === 'bot' && (msg.reasoning || (msg.citations && msg.citations.length > 0)) && (
+                  <div className="w-full max-w-[90%] mt-1.5 space-y-2">
+                    
+                    {/* Collapsible thought trail */}
+                    {msg.reasoning && (
+                      <details className="group bg-slate-900/40 border border-slate-800/80 rounded-xl overflow-hidden">
+                        <summary className="flex items-center justify-between p-2.5 text-[10px] font-semibold text-slate-400 cursor-pointer hover:bg-slate-800/20 transition-all">
+                          <span className="flex items-center gap-1.5">
+                            <Icons.Search />
+                            AI Reasoning & Search Path
+                          </span>
+                          <span className="transition-transform group-open:rotate-180 text-[8px]">▼</span>
+                        </summary>
+                        <div className="p-3 border-t border-slate-800/40 text-[10px] text-slate-400 leading-normal font-mono bg-slate-950/40">
+                          {msg.reasoning}
+                        </div>
+                      </details>
+                    )}
+
+                    {/* Source Citations */}
+                    {msg.citations && msg.citations.length > 0 && (
+                      <div className="bg-slate-900/30 border border-slate-800/80 rounded-xl p-3 space-y-2">
+                        <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          <Icons.Check />
+                          Cited Sources & Findings:
+                        </div>
+                        {msg.citations.map((cite, idx) => (
+                          <div key={idx} className="border-l-2 border-indigo-500 pl-2 py-0.5">
+                            <p className="text-[10px] text-slate-300 italic">"{cite.quote}"</p>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <button
+                                onClick={() => handleCitationClick(cite.section)}
+                                className="text-[9px] font-bold bg-indigo-950 hover:bg-indigo-900 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-900/60 transition-all"
+                              >
+                                {cite.section}
+                              </button>
+                              <span className="text-[9px] text-slate-500">Relevance: {cite.relevance}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                  </div>
+                )}
+
+              </div>
+            ))}
+
+            {loading && (
+              <div className="flex items-center gap-2 text-indigo-400 text-xs font-semibold py-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.2s]"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.4s]"></div>
+                <span>Copilot is reasoning...</span>
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+
+          {/* Quick-Ask Helper Actions */}
+          <div className="p-2 border-t border-slate-800 bg-slate-950 flex flex-wrap gap-1.5 shrink-0">
+            <button
+              onClick={() => { setInputValue("What is the core problem that this paper addresses?"); }}
+              className="text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-800/80 transition-all"
+            >
+              🎯 Core Problem
+            </button>
+            <button
+              onClick={() => { setInputValue("Explain the detailed methodology section clearly."); }}
+              className="text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-800/80 transition-all"
+            >
+              🛠 Methodology
+            </button>
+            <button
+              onClick={() => { setInputValue("I have a funny unrelated question: can you write a haiku about space travel?"); }}
+              className="text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-300 px-2.5 py-1.5 rounded-lg border border-slate-800/80 transition-all"
+            >
+              🚀 Out of Topic
+            </button>
+          </div>
+
+          {/* Chat Form */}
+          <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-800 bg-slate-900/60 flex gap-2 shrink-0">
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Ask anything (complex details or random out of topic queries)..."
+              className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500 text-slate-100 placeholder-slate-500"
+            />
+            <button
+              type="submit"
+              disabled={loading || !inputValue.trim()}
+              className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all disabled:opacity-50"
+            >
+              Send
+            </button>
+          </form>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
