@@ -1,1 +1,1 @@
-# arxim-llm-workspace
+# arXiv AI Research Lab
